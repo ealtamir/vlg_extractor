@@ -157,8 +157,8 @@ void SelfSimDescriptor_fc::SSD(const Mat& img, Point pt, Mat& ssd) const
 	}
 
 
-void SelfSimDescriptor_fc::compute(const Mat& img, vector<float>& descriptors, vector<int>& pointsX, vector<int>& pointsY, int* logpolar, Size winStride,
-	                                const vector<Point>& locations ) const
+void SelfSimDescriptor_fc::compute(const Mat& img, std::vector<float>& descriptors, std::vector<int>& pointsX, std::vector<int>& pointsY, int* logpolar, Size winStride,
+	                                const std::vector<Point>& locations ) const
 	{
 	    CV_Assert( img.depth() == CV_8U );
 
@@ -168,7 +168,7 @@ void SelfSimDescriptor_fc::compute(const Mat& img, vector<float>& descriptors, v
 	    int i, nwindows = locations.empty() ? gridSize.width*gridSize.height : (int)locations.size();
 	    int border = largeSize/2 + smallSize/2;
 	    int fsize = (int)getDescriptorSize();
-	    vector<float> tempFeature(fsize+1);
+	    std::vector<float> tempFeature(fsize+1);
 	    descriptors.resize(fsize*nwindows + 1);
 	    Mat ssd(largeSize, largeSize, CV_32F); //mappingMask;
 	    int index;

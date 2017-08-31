@@ -43,6 +43,7 @@ bow500 2 [C, 8000]
  * */
 #define NUM_LOW_LEVEL_FEATURES 5
 #define NUM_LOW_LEVEL_FEATURES_PYRAMID 15
+#define CV_LOAD_IMAGE_COLOR 1
 
 
 /* ******** fields   */

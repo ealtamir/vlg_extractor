@@ -52,7 +52,7 @@ int hist_ssim(IplImage* imgipl, float* centers,int* logpolar, CvMat* histMat, Cv
 // logpolar: an integer array of logpolar mapping
 // histMat: output feature
 {
-		Mat imgMat(imgipl,0);
+    cv::Mat imgMat = cv::cvarrToMat(imgipl);
 		Mat resizedMat;
 		SelfSimDescriptor_fc test(5,81,0,3,10);
 		std::vector<float> descriptors;
@@ -84,7 +84,7 @@ int hist_ssim(IplImage* imgipl, float* centers,int* logpolar, CvMat* histMat, Cv
 			// quantize
 			int* hist=NULL;
 			hist=(int*) malloc(sizeof(int)*NCHANNEL);
-			int histlen=quantize(descriptors,pointsX,pointsY,hist,centers,resizedMat.size().height,resizedMat.size().width);
+			//int histlen=quantize(descriptors,pointsX,pointsY,hist,centers,resizedMat.size().height,resizedMat.size().width);
 			memcpy(histMat->data.i, hist, sizeof(int)*histMat->rows*histMat->cols);
 			if(hist==NULL)
 				return ERROR_SSIM_HIST_EXTRACTION_PROBLEM;

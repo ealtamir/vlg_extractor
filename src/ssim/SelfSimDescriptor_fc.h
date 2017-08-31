@@ -96,7 +96,7 @@ public:
     size_t getDescriptorSize() const;
     Size getGridSize( Size imgsize, Size winStride ) const;
 
-    virtual void compute(const Mat& img, vector<float>& descriptors,vector<int>& pointsX, vector<int>& pointsY, int* logpolar, Size winStride=Size(),const vector<Point>& locations=vector<Point>()) const;
+    virtual void compute(const Mat& img, std::vector<float>& descriptors,std::vector<int>& pointsX, std::vector<int>& pointsY, int* logpolar, Size winStride=Size(),const std::vector<Point>& locations=std::vector<Point>()) const;
     //virtual void computeLogPolarMapping(Mat& mappingMask) const;
     virtual void SSD(const Mat& img, Point pt, Mat& ssd) const;
 
@@ -110,6 +110,6 @@ public:
         DEFAULT_NUM_ANGLES = 20, DEFAULT_START_DISTANCE_BUCKET = 3,
         DEFAULT_NUM_DISTANCE_BUCKETS = 7 };
 };
-	
+
 
 #endif

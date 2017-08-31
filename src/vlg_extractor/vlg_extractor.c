@@ -7,7 +7,6 @@
  *
  */
 
-#include "vlg_extractor.h"
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
@@ -24,6 +23,7 @@
 #include "extract_picodes.h"
 #include "extract_metaclass.h"
 #include "vlg_extractor_help.h"
+#include "vlg_extractor.h"
 
 
 void exit_printing_error_code(int err) {
@@ -35,14 +35,13 @@ void exit_printing_error_code(int err) {
 	exit(err);
 }
 
-
 void IO_Type_constructor(IO_Type* obj, unsigned int _type, const char* _MAT_varname, const char* _suffix)
 {
 	assert(_MAT_varname);
 	assert(_suffix);
 	assert(strlen(_MAT_varname) < IOTYPE_MAT_MAX_VARNAME_LENGTH);
 	assert(strlen(_suffix) < IOTYPE_MAX_PREFIX_LENGTH);
-	
+
 	obj->type = _type;
 	strcpy(obj->MAT_varname, _MAT_varname);
 	strcpy(obj->suffix, _suffix);
@@ -183,7 +182,7 @@ void parse_options(Program_Options* options, int argc, char *argv[])
 
 
 int main(int argc, char *argv[])
-{	
+{
 	Program_Options* options = NULL;
 	char* root_dir = NULL;
 	char* buffer = NULL;
@@ -192,7 +191,7 @@ int main(int argc, char *argv[])
 	/* the program is starting.. */
 	printf("%s - version %s\n", PROGRAM_NAME, VERSION);
 
-    
+
 #if defined(SYSTEM_TYPE_WIN)
 	/* Linux uses by default the extended-double FPU precision.
 	 * We force it on Windows.
@@ -205,7 +204,7 @@ int main(int argc, char *argv[])
 //	printf("mode=%x\n", mode);
 //#else
 //	assert(0);
-#endif	
+#endif
 #endif
 
 
@@ -240,14 +239,14 @@ int main(int argc, char *argv[])
 
 	/* parsing the options */
 	parse_options(options, argc, argv);
-	
+
 	/* run the feature extraction */
 	command_extract_features(options);
 
 	/* free */
 	Program_Options_destructor(options);
 	free(options);
-	
+
     printf("EXIT\n");
     return (0);
 }
@@ -263,9 +262,53 @@ void command_help(Program_Options* options)
     }
 }
 
-								
-								
-								
+
+int write_output(const char* file_name, const Matrix* M, const IO_Type* output_type, bool output_overwriting)
+{
+	int res;
+	char buffer[MAX_CHARACTERS_LINE];
+
+	assert(file_name);
+	assert(M);
+
+	if (output_type->type & IOTYPE_ASCII_TYPE) {
+		sprintf(buffer, "%s"IOTYPE_ASCII_EXTENSION, file_name);
+		if (!exist_file(buffer) || output_overwriting) {
+			res = write_ascii_matrix(M, buffer);
+			if (res) return res;
+		}
+	}
+	if (output_type->type & IOTYPE_FLOAT_VLG_TYPE) {
+		sprintf(buffer, "%s"IOTYPE_FLOAT_VLG_EXTENSION, file_name);
+		if (!exist_file(buffer) || output_overwriting) {
+			res = write_float_matrix(M, buffer);
+			if (res) return res;
+		}
+	}
+	if (output_type->type & IOTYPE_MAT_TYPE) {
+#ifdef MAT_SUPPORT
+		assert(output_type->MAT_varname);
+		sprintf(buffer, "%s"IOTYPE_MAT_EXTENSION, file_name);
+		if (!exist_file(buffer) || output_overwriting) {
+			res = write_mat_matrix(M, buffer, output_type->MAT_varname);
+			if (res) return res;
+		}
+#else
+		assert(0);
+#endif
+	}
+	if (output_type->type & IOTYPE_BIN_TYPE) {
+		assert(is_vector(M));
+		sprintf(buffer, "%s"IOTYPE_BIN_EXTENSION, file_name);
+		if (!exist_file(buffer) || output_overwriting) {
+			write_bit_vector(M, buffer);
+		}
+	}
+
+	return 0;
+}
+
+
 
 void command_extract_features(Program_Options* options)
 {
@@ -281,11 +324,11 @@ void command_extract_features(Program_Options* options)
 	Classemes* img_classemes = NULL;
 	Picodes* img_picodes = NULL;
 	Metaclass* img_mc = NULL;
-	
+
 	assert(options);
-	
+
 	input_filenames_2_liststring(&list_img_input, &list_img_output, options, 1, NULL);
-	
+
 	/* init */
 	printf("Loading parameters... ");
 	fflush(stdout);
@@ -485,7 +528,7 @@ void command_extract_features(Program_Options* options)
 		printf("done.\n");
 		fflush(stdout);
 	}
-	
+
 	/* end */
 	if ((options->save_mc.type != IOTYPE_NDEF_TYPE) || (options->save_mc_bin.type != IOTYPE_NDEF_TYPE)) {
 		Metaclass_end();
@@ -518,7 +561,7 @@ void command_test(Program_Options* options)
 void check_option_value(const char* option, const char* value)
 {
 	assert(option);
-	
+
 	if (!value) {
 		fprintf(stderr, ERROR_PARSING_ARGUMENTS_STR": It's not been specified a value for the the option %s \n", option);
 		exit(ERROR_PARSING_ARGUMENTS);
@@ -537,29 +580,29 @@ void input_filenames_2_liststring(ListString** _ls_input, ListString** _ls_outpu
 	char buffer2[MAX_CHARACTERS_LINE];
 	char* s = NULL;
 	unsigned int i;
-	
+
 	assert(_ls_input);
 	assert(_ls_output);
 	assert(options);
-	
+
 	/* let's check the required parameters */
 	if (!(options->input_filename || options->list_input_filename)) {
 		fprintf(stderr, ERROR_MISSING_ARGUMENTS_STR": you have to specify --input-filename XOR --list-input-filename\n");
 		exit(ERROR_MISSING_ARGUMENTS);
 	}
-	
+
 	ls_input = (ListString*) malloc(sizeof(ListString));
 	ls_output = (ListString*) malloc(sizeof(ListString));
-	
+
 	if (options->input_filename) {
 		/* it's set a single file name */
 		create_empty_list_string(ls_input);
 		create_empty_list_string(ls_output);
-		
+
 		s = (char*) malloc((strlen(options->input_filename)+1)*sizeof(char));
 		strcpy(s, options->input_filename);
 		add_string_to_list(ls_input, s);
-		
+
 		if (!options->output_filename) {
 			options->output_filename = options->input_filename;
 		}
@@ -574,7 +617,7 @@ void input_filenames_2_liststring(ListString** _ls_input, ListString** _ls_outpu
 		/* it's set a file containing a list of images */
 		create_empty_list_string(ls_input);
 		create_empty_list_string(ls_output);
-		
+
 		ls_temp = (ListString*) malloc(sizeof(ListString));
 		res = read_ascii_list_string(options->list_input_filename, ls_temp);
 		if (res) { exit(res); }
@@ -583,7 +626,7 @@ void input_filenames_2_liststring(ListString** _ls_input, ListString** _ls_outpu
 			s = (char*) malloc((strlen(buffer)+1)*sizeof(char));
 			strcpy(s, buffer);
 			add_string_to_list(ls_input, s);
-			
+
 			sprintf(buffer, "%s%c%s", options->output_path, SYSTEM_PATH_SEPARATOR, get_string_from_list(ls_temp, i));
 			string_delete_extension(buffer);
 			if (_suffix) {
@@ -596,7 +639,7 @@ void input_filenames_2_liststring(ListString** _ls_input, ListString** _ls_outpu
 		delete_list_string(ls_temp);
 		free(ls_temp);
 	}
-	
+
 	/* creating missing output directories */
 	if (_create_missing_output_directories) {
 		buffer2[0] = '\0'; /*zero-length string*/
@@ -619,39 +662,39 @@ void input_filenames_2_liststring(ListString** _ls_input, ListString** _ls_outpu
 			}
 		}
 	}
-	
+
 	/* return the lists */
 	*_ls_input = ls_input;
 	*_ls_output = ls_output;
 }
 
 
-								
+
 
 
 
 void Program_Options_constructor(Program_Options* obj, const char* root_dir)
 {
 	char buffer[MAX_CHARACTERS_LINE];
-	
+
 	assert(obj);
-	
+
 	obj->root_path = string_clone(root_dir);
-	
+
 	sprintf(buffer, "%s%c%s", obj->root_path, SYSTEM_PATH_SEPARATOR, DEFAULT_TEST_DIR);
 	obj->test_path = string_clone(buffer);
-	
+
 	obj->input_filename = NULL;
 	obj->output_filename = NULL;
 	obj->list_input_filename = NULL;
 	obj->input_path = NULL;
 	obj->output_path = NULL;
-	
+
 	sprintf(buffer, "%s%c%s", obj->root_path, SYSTEM_PATH_SEPARATOR, DEFAULT_DATA_DIR);
 	obj->parameters_dir = string_clone(buffer);
-	
+
 	obj->output_overwriting = 1;
-	
+
 	IO_Type_constructor(&obj->load_concatenationLowLevelFeatures, IOTYPE_NDEF_TYPE, DEFAULT_IOTYPE_MAT_VARNAME, DEFAULT_PREFIX_CONCATENATIONLOWLEVELFEATURES);
 	IO_Type_constructor(&obj->save_classemes, IOTYPE_NDEF_TYPE, DEFAULT_IOTYPE_MAT_VARNAME, DEFAULT_PREFIX_CLASSEMES);
 	IO_Type_constructor(&obj->save_classemes_bin, IOTYPE_NDEF_TYPE, DEFAULT_IOTYPE_MAT_VARNAME, DEFAULT_PREFIX_CLASSEMESBIN);
@@ -679,50 +722,6 @@ void Program_Options_destructor(Program_Options* obj)
 
 
 
-int write_output(const char* file_name, const Matrix* M, const IO_Type* output_type, bool output_overwriting)
-{
-	int res;
-	char buffer[MAX_CHARACTERS_LINE];
-	
-	assert(file_name);
-	assert(M);
-	
-	if (output_type->type & IOTYPE_ASCII_TYPE) {
-		sprintf(buffer, "%s"IOTYPE_ASCII_EXTENSION, file_name);
-		if (!exist_file(buffer) || output_overwriting) {
-			res = write_ascii_matrix(M, buffer);
-			if (res) return res;
-		}
-	}
-	if (output_type->type & IOTYPE_FLOAT_VLG_TYPE) {
-		sprintf(buffer, "%s"IOTYPE_FLOAT_VLG_EXTENSION, file_name);
-		if (!exist_file(buffer) || output_overwriting) {
-			res = write_float_matrix(M, buffer);
-			if (res) return res;
-		}
-	}
-	if (output_type->type & IOTYPE_MAT_TYPE) {
-#ifdef MAT_SUPPORT
-		assert(output_type->MAT_varname);
-		sprintf(buffer, "%s"IOTYPE_MAT_EXTENSION, file_name);
-		if (!exist_file(buffer) || output_overwriting) {
-			res = write_mat_matrix(M, buffer, output_type->MAT_varname);
-			if (res) return res;
-		}
-#else
-		assert(0);
-#endif
-	}
-	if (output_type->type & IOTYPE_BIN_TYPE) {
-		assert(is_vector(M));
-		sprintf(buffer, "%s"IOTYPE_BIN_EXTENSION, file_name);
-		if (!exist_file(buffer) || output_overwriting) {
-			write_bit_vector(M, buffer);
-		}
-	}
-	
-	return 0;
-}
 
 
 
@@ -733,12 +732,12 @@ int read_input(const char* file_name, Matrix* M, const IO_Type* input_type)
 {
 	int res;
 	char buffer[MAX_CHARACTERS_LINE];
-	
+
 	assert(file_name);
 	assert(M);
 	assert(!(input_type->type & IOTYPE_ASCII_TYPE)); /* ASCII is not currently supported in reading */
 	assert(!(input_type->type & IOTYPE_BIN_TYPE)); /* BIN is not currently supported in reading */
-	
+
 	if (input_type->type & IOTYPE_FLOAT_VLG_TYPE) {
 		sprintf(buffer, "%s"IOTYPE_FLOAT_VLG_EXTENSION, file_name);
 		res = read_float_matrix(M, buffer);
@@ -754,7 +753,7 @@ int read_input(const char* file_name, Matrix* M, const IO_Type* input_type)
 		assert(0);
 #endif
 	}
-	
+
 	/* we should not be here*/
 	assert(0);
 	return 0;
@@ -768,9 +767,9 @@ int read_input(const char* file_name, Matrix* M, const IO_Type* input_type)
 int exist_output(const char* file_name, const IO_Type* output_type)
 {
 	char buffer[MAX_CHARACTERS_LINE];
-	
+
 	assert(file_name);
-	
+
 	if (output_type->type & IOTYPE_ASCII_TYPE) {
 		sprintf(buffer, "%s"IOTYPE_ASCII_EXTENSION, file_name);
 		if (!exist_file(buffer)) {
@@ -799,7 +798,7 @@ int exist_output(const char* file_name, const IO_Type* output_type)
 			return 0;
 		}
 	}
-	
+
 	/* if we are here it means that all the output files exist */
 	return 1;
 }

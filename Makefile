@@ -1,15 +1,16 @@
 CC = gcc
 CXX = g++
-INCFLAGS += -I/usr/local/opencv-2.4.12/include/
-INCFLAGS += -I/usr/local/opencv-2.4.12/include/opencv
-LDFLAGS += -L/usr/local/opencv-2.4.12/build/lib
+INCFLAGS += -I/usr/local/include
+#INCFLAGS += -I/usr/local/include/opencv2
+LDFLAGS += -L/usr/local/lib
 
-CFLAGS = -Wall -Wno-unused-function -Isrc -Isrc/sift
+CFLAGS = -Wall -Wno-unused-function -Isrc -Isrc/sift -Wno-unused-variable
+CFLAGS += -Wno-int-conversion -Wno-implicit-function-declaration
 CFLAGS += -DDEBUG0 -DDEBUG1 -DINCLUDE_EXTRA_FEATURES
 CFLAGS += -g -O3
 
 LIBS = -lstdc++ -lm
-LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_contrib -lopencv_legacy -lopencv_flann
+LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_flann #-lopencv_contrib #-lopencv_legacy
 
 OBJECTS += src/vlg_toolbox/utils.o src/vlg_toolbox/matrix.o src/vlg_toolbox/list_string.o src/vlg_toolbox/homogeneous_kernel_map.o src/vlg_toolbox/bitmap.o src/vlg_toolbox/opencv.o
 OBJECTS += src/gist/extract_gist.o src/gist/gistFeature.o src/gist/gistGabor.o src/gist/makeGabor.o src/gist/makePrefilter.o src/gist/padarraySym.o src/gist/prefilt.o

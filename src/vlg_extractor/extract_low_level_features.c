@@ -19,6 +19,7 @@
 #include <ssim/hist_ssim.h>
 #include <vlg_toolbox/opencv.h>
 #include <vlg_toolbox/homogeneous_kernel_map.h>
+#include <math.h>
 
 
 static const char* feature_types[] = {"gist", "phog", "phog2pi", "ssim", "sift"};
@@ -48,7 +49,6 @@ static int phog_bin360 = 40;
 static int phog_bin180 = 20;
 static int phog_L = 3;
 static int phog_highthres = 115; /* canny detector threshold */
-
 
 int ImageData_init(const Program_Options* _options)
 {

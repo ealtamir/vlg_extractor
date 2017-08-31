@@ -21,7 +21,7 @@ int phog_fc(int bin360, int bin180, int L, int highthres, IplImage* imgc, CvMat*
 // phog360: output feature
 // phog180: output feature
 {
-	cv::Mat imgt(imgc,0);
+  cv::Mat imgt = cv::cvarrToMat(imgc);
 	cv::Mat grayimg;//(imgt.rows,imgt.cols,CV_8UC1);
 	cv::cvtColor(imgt,grayimg,CV_BGR2GRAY);
 	/* resize */
