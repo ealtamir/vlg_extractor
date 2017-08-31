@@ -1,7 +1,7 @@
 CC = gcc
 CXX = g++
-INCFLAGS += -I/usr/local/include
-#INCFLAGS += -I/usr/local/include/opencv2
+INCFLAGS += -I/usr/local/include/opencv
+INCFLAGS += -I/usr/local/include/opencv2
 LDFLAGS += -L/usr/local/lib
 
 CFLAGS = -Wall -Wno-unused-function -Isrc -Isrc/sift -Wno-unused-variable
