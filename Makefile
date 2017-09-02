@@ -10,7 +10,7 @@ CFLAGS += -DDEBUG0 -DDEBUG1 -DINCLUDE_EXTRA_FEATURES
 CFLAGS += -g -O3
 
 LIBS = -lstdc++ -lm
-LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_flann #-lopencv_contrib #-lopencv_legacy
+LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_ml -lopencv_video -lopencv_features2d -lopencv_calib3d -lopencv_objdetect -lopencv_flann -lopencv_contrib -lopencv_legacy
 
 OBJECTS += src/vlg_toolbox/utils.o src/vlg_toolbox/matrix.o src/vlg_toolbox/list_string.o src/vlg_toolbox/homogeneous_kernel_map.o src/vlg_toolbox/bitmap.o src/vlg_toolbox/opencv.o
 OBJECTS += src/gist/extract_gist.o src/gist/gistFeature.o src/gist/gistGabor.o src/gist/makeGabor.o src/gist/makePrefilter.o src/gist/padarraySym.o src/gist/prefilt.o
